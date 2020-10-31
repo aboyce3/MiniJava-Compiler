@@ -11,7 +11,7 @@ type: 'int' '[' ']'
 	| 'double' '[' ']'
 	| 'boolean'
 	| 'int'
-    | 'double'
+        | 'double'
 	| Identifier
     ;
 

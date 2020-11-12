@@ -1,7 +1,9 @@
 public class Variable {
-    private String type, identifier, value;
+    private String identifier, value;
+    MiniJavaGrammarParser.TypeContext type;
+    int arrayLength;
 
-    public Variable(String t, String i, String v){
+    public Variable(MiniJavaGrammarParser.TypeContext t, String i, String v){
         type = t;
         identifier = i;
         value = v;
@@ -11,16 +13,22 @@ public class Variable {
         return identifier;
     }
 
-    public String getType(){
-        return type;
-    }
+    public MiniJavaGrammarParser.TypeContext getType(){ return type; }
 
     public String getValue(){
         return value;
     }
 
+    public int getArrayLength(){ return arrayLength; }
+
+    public void setArrayLength(int i){ arrayLength = i;}
+
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String toString(){
+        return this.type.getText();
     }
 
 }

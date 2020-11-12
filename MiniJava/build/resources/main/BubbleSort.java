@@ -77,7 +77,7 @@ class BBS{
 	number = new int[sz] ;
 	
 	number[0] = 20 ;
-	number[1] = 7  ; 
+	number[1] = 7  ;
 	number[2] = 12 ;
 	number[3] = 18 ;
 	number[4] = 2  ; 

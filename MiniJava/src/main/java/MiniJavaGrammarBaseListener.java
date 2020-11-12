@@ -1,4 +1,4 @@
-// Generated from MiniJavaGrammar.g4 by ANTLR 4.7.2
+// Generated from MiniJavaGrammar.g4 by ANTLR 4.8
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -33,9 +33,7 @@ public class MiniJavaGrammarBaseListener implements MiniJavaGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMainClass(MiniJavaGrammarParser.MainClassContext ctx) {
-
-	}
+	@Override public void exitMainClass(MiniJavaGrammarParser.MainClassContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

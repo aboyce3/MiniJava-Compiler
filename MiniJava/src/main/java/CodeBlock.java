@@ -1,24 +1,54 @@
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CodeBlock {
-    Stack<String> instructions;
+    private List instructions;
+    private ArrayList<Variable> variables;
+    private CodeBlock innerBlock;
+    private MiniJavaGrammarParser.ExpressionContext returnStatement;
 
-    public CodeBlock(){
-        instructions = new Stack<>();
+    public CodeBlock(ArrayList<Variable> vars, List i){
+        instructions = i;
+        variables = vars;
     }
 
-    public void addInstruction(String e){
+    public void setReturnStatement(MiniJavaGrammarParser.ExpressionContext s){ returnStatement = s; }
+
+    public MiniJavaGrammarParser.ExpressionContext getReturnStatement() { return returnStatement; }
+
+    public void setInnerBlock(CodeBlock b){ innerBlock = b; }
+
+    public Variable findVar(String s){
+        for(Variable v : variables){
+            if(v.getIdentifier().equals(s))
+                return v;
+        }
+        return null;
+    }
+    public void addVariables(ArrayList<Variable> vars) {
+        for (Variable v : vars) variables.add(v);
+    }
+
+    public CodeBlock getInnerBlock(){ return innerBlock; }
+
+    public void addInstruction(MiniJavaGrammarParser.StatementContext e){
         instructions.add(e);
     }
-    public String pop(){
-        return instructions.pop();
-    }
-    public void push(String e){
-        instructions.push(e);
+
+    public void add(MiniJavaGrammarParser.StatementContext e){
+        instructions.add(e);
     }
 
-    public Stack<String> getInstructions() {
+    public List getInstructions() {
         return instructions;
+    }
+
+    public ArrayList<Variable> getVariables() {
+        return variables;
+    }
+
+    public void addVar(Variable v){
+        variables.add(v);
     }
 
 }

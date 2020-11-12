@@ -1,20 +1,21 @@
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Main extends BaseErrorListener{
 
-    public static void main(String[] args){
-       CharStream stream = null;
-       try{
-          stream = CharStreams.fromFileName("/home/andrew/IdeaProjects/MiniJava/src/main/resources/Factorial.java");
-       }catch(Exception e){
-           e.printStackTrace();
-       }
-       MiniJavaGrammarLexer lexer = new MiniJavaGrammarLexer(stream);
-       CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-       MiniJavaGrammarParser parser = new MiniJavaGrammarParser(tokenStream);
-       ParseTree tree = parser.goal();
-       parser.setErrorHandler(new DefaultErrorStrategy());
-
+    public static void main(String[] args) {
+        CharStream stream = null;
+        try {
+            stream = CharStreams.fromFileName("/home/andrew/IdeaProjects/MiniJava/src/main/resources/BubbleSort.java");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        MiniJavaGrammarLexer lexer = new MiniJavaGrammarLexer(stream);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        MiniJavaGrammarParser parser = new MiniJavaGrammarParser(tokenStream);
+        parser.setErrorHandler(new DefaultErrorStrategy());
+        MiniJavaGrammarBaseVisitor classVisitor = new MiniJavaGrammarBaseVisitor();
+        Class traverseResult = (Class) classVisitor.visit(parser.goal());
+        ErrorHandling handler = null;
+        if(classVisitor.link()){}
     }
 }

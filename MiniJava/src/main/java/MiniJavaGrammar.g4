@@ -11,7 +11,7 @@ type: 'int' '[' ']'
 	| 'double' '[' ']'
 	| 'boolean'
 	| 'int'
-        | 'double'
+    | 'double'
 	| Identifier
     ;
 
@@ -33,7 +33,6 @@ expression: expression ( '&&' | '<' | '+' | '-'| '*' ) expression
 	| 	'false'
 	| 	Identifier
 	| 	'this'
-	| 	'this' expression
 	| 	'new' 'int' '[' expression ']'
 	| 	'new' 'double' '[' expression ']'
 	| 	'new' Identifier '(' ')'

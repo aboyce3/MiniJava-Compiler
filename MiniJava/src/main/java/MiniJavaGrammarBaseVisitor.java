@@ -144,11 +144,11 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 						MiniJavaGrammarParser.StatementContext inst = (MiniJavaGrammarParser.StatementContext) instruction;
 						if (inst.getText().contains("=")) {
 							if(inst.expression().size() == 2){
-								if(!evaluateAssignmentExpression(inst.expression(0), method).equals("int")){
+								if(!evaluateAssignmentExpressions(inst.expression(0), method).equals("int")){
 									String output = "\u001B[31m" + inst.expression(0).getText() + "is not of type int.";
 									System.out.println(output + "\u001B[0m");
 									return false;
-								} else if (!evaluateAssignmentExpression(inst.expression(1), method).equals(method.getBlock().findVar(inst.Identifier().getText()).getType())){
+								} else if (!evaluateAssignmentExpressions(inst.expression(1), method).equals(method.getBlock().findVar(inst.Identifier().getText()).getType())){
 									String output = "\u001B[31m" + inst.expression(0).getText() + "is not of type int.";
 									System.out.println(output + "\u001B[0m");
 									return false;
@@ -162,21 +162,21 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 	}
 
 	//Evaluates an expression to its given type
-	public String evaluateAssignmentExpression(MiniJavaGrammarParser.ExpressionContext expression, MethodDeclaration method){
+	public String evaluateAssignmentExpressions(MiniJavaGrammarParser.ExpressionContext expression, MethodDeclaration method){
 		if(expression.getText().equals("true") || expression.getText().equals("false")) return "boolean";
 		else if(expression.INTEGER_LITERAL() != null) return "int";
 		else if(expression.DOUBLE_LITERAL() != null) return "double";
 		else if(expression.getText().equals("this")) return method.className();
-		else if(!expression.getText().contains("(") && expression.Identifier() != null) {
-			if (method.getBlock().findVar(expression.Identifier().getText()) != null) {
-				method.getBlock().findVar(expression.Identifier().getText()).getType().getText();
-			}
-			else {
+		else if(expression.getText().equals(expression.Identifier().getText())){
+			if(method.getBlock().findVar(expression.Identifier().getText()) == null){
 				String output = "\u001B[31m" + expression.Identifier().getText() + "is not a valid symbol.";
 				System.out.println(output + "\u001B[0m");
 				System.exit(1);
+			}else{
+				return method.getBlock().findVar(expression.Identifier().getText()).getType().getText();
 			}
-		} else if(expression.Identifier() != null && expression.getText().contains("new") && expression.expression().size() == 0){
+		}
+		else if(expression.Identifier() != null && expression.getText().contains("new") && expression.expression().size() == 0){
 			if(classes.get(expression.Identifier().getText()) != null){
 				return expression.Identifier().getText();
 			}else {
@@ -184,8 +184,8 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 				System.out.println(output + "\u001B[0m");
 				System.exit(1);
 			}
-		} else if(expression.getText().contains("new") && expression.Identifier() == null && expression.getText().contains("[")){
-			//if()
+		} else if(expression.getText().contains("new") && expression.Identifier() != null && expression.getText().contains("[")){
+
 		}
 		return "";
 	}

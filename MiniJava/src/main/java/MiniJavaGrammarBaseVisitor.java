@@ -3,6 +3,7 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class provides an empty implementation of {@link MiniJavaGrammarVisitor},
@@ -125,130 +126,150 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 	//Checked for duplicate declarations
 	public boolean declarationCheck() {
 		for(MethodDeclaration m : allMethods){
-			for(int i = 0; i < m.getParams().size(); i++)
-				for(int j = i+1; j < m.getParams().size(); j++)
-					if(m.getParams().get(i).getIdentifier().equals(m.getParams().get(j).getIdentifier())){
-						String output = "\u001B[31m" + "Identical declarations for the variable name " + m.getParams().get(j).getIdentifier();
+			for(int i = 0; i < m.getTotal().size(); i++) {
+				for (int j = i + 1; j < m.getTotal().size(); j++) {
+					String s = m.getTotal().get(i).getIdentifier();
+					String t = m.getTotal().get(j).getIdentifier();
+					if (s.equals(t)) {
+						String output = "\u001B[31m" + "Identical declarations for the variable name " + m.getTotal().get(j).getIdentifier();
 						System.out.println(output + "\u001B[0m");
 						return false;
 					}
+				}
+			}
 		}
-		symbolsAndTypes();
-		return true;
+		return symbolsAndTypes();
 	}
 
 	//Symbol resolution and Type Checking
-	public void symbolsAndTypes(){
+	public boolean symbolsAndTypes(){
 		for(MethodDeclaration method : allMethods){
 			if(method.getBlock().getInstructions().size() > 0) {
 				for (Object instruction : method.getBlock().getInstructions()) {
 					MiniJavaGrammarParser.StatementContext inst = (MiniJavaGrammarParser.StatementContext) instruction;
-					if (inst.getText().contains("=") && inst.Identifier() != null) {
+					 if(inst.getText().contains("while")){
+						String s = evaluateExpressions(inst.expression(0),method);
+						if(!s.equals("boolean")){
+							String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
+							System.out.println(output + "\u001B[0m");
+							System.exit(0);
+						}else {
+							Boolean b = helper(method, inst.statement(0).statement());
+						}
+					}
+					else if(inst.getText().contains("if")){
+						 String s = evaluateExpressions(inst.expression(0),method);
+						 if(!s.equals("boolean")){
+							 String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
+							 System.out.println(output + "\u001B[0m");
+							 System.exit(0);
+						 }else {
+							 Boolean b = helper(method, inst.statement(0).statement());
+							 Boolean c = helper(method, inst.statement(1).statement());
+						 }
+					}
+					else if (inst.getText().contains("=") && inst.Identifier() != null) {
 						if (inst.expression().size() == 2) {
 							String s = evaluateExpressions(inst.expression(1), method);
 							String m = method.getBlock().findVar(inst.Identifier().getText()).getType().getText();
 							if (!evaluateExpressions(inst.expression(0), method).equals("int")) {
-								String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int.";
+								String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int at line number " + inst.start.getLine();
 								System.out.println(output + "\u001B[0m");
 								System.exit(0);
-							} else if (!s.equals(m)) {
-								String output = "\u001B[31m" + inst.expression(0).getText() + " is not of the same type.";
-								System.out.println(output + "\u001B[0m");
-								System.exit(0);
+							} else if (!s.equals(m.substring(0,m.indexOf("["))) ) {
+								String b = m.substring(0,m.indexOf("["));
+								if(!s.equals("int") && !b.equals("double")){
+									String output = "\u001B[31m" + inst.expression(1).getText() + " is not of the same type at line number " + inst.start.getLine();
+									System.out.println(output + "\u001B[0m");
+									System.exit(0);
+								}
 							}
 						} else if(inst.expression().size() == 1){
 							String s = evaluateExpressions(inst.expression(0), method);
 							String m = method.getBlock().findVar(inst.Identifier().getText()).getType().getText();
 							if (!s.equals(m)) {
-								String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int.";
+								String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int at line number " + inst.start.getLine();
 								System.out.println(output + "\u001B[0m");
 								System.exit(0);
-							}
-						}
-					} else if(inst.getText().contains("while")){
-						if(evaluateExpressions(inst.expression(0),method).equals("boolean")){
-							boolean b = ifWhileHelper(inst.statement(0).statement(),method);
-						}
-					}else if(inst.getText().contains("{")){
-						boolean b = ifWhileHelper(inst.statement(),method);
-					}
-					else if(inst.getText().contains("if")){
-						if(evaluateExpressions(inst.expression(0),method).equals("boolean")){
-							if(ifWhileHelper(inst.statement(0).statement(),method)){
-								Boolean s = ifWhileHelper(inst.statement(1).statement(),method);
 							}
 						}
 					}
 					else if(inst.getText().contains("System")){
 						String s = evaluateExpressions(inst.expression(0),method);
-						boolean b = s.equals("int");
+						if(!s.equals("int")){
+							String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type at line number " + inst.start.getLine();
+							System.out.println(output + "\u001B[0m");
+							System.exit(0);
+						}
 					}
 				}
 			}
 		}
+		return true;
 	}
 
-	public boolean ifWhileHelper(java.util.List<MiniJavaGrammarParser.StatementContext> list, MethodDeclaration method){
-		if(method.getBlock().getInstructions().size() > 0) {
+	public boolean helper(MethodDeclaration method, List<MiniJavaGrammarParser.StatementContext> list){
 		for (Object instruction : list) {
 			MiniJavaGrammarParser.StatementContext inst = (MiniJavaGrammarParser.StatementContext) instruction;
-			if (inst.getText().contains("=") && inst.Identifier() != null) {
+			if(inst.getText().contains("while")){
+				System.out.println(inst.expression(0).getText());
+				String s = evaluateExpressions(inst.expression(0),method);
+				if(!s.equals("boolean")){
+					String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
+					System.out.println(output + "\u001B[0m");
+					System.exit(0);
+				}else {
+					Boolean b = helper(method, inst.statement(0).statement());
+				}
+			}
+			else if(inst.getText().contains("if")){
+				String s = evaluateExpressions(inst.expression(0),method);
+				if(!s.equals("boolean")){
+					String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
+					System.out.println(output + "\u001B[0m");
+					System.exit(0);
+				}else {
+					Boolean b = helper(method, inst.statement(0).statement());
+					Boolean c = helper(method, inst.statement(1).statement());
+				}
+			}
+			else if (inst.getText().contains("=") && inst.Identifier() != null) {
 				if (inst.expression().size() == 2) {
 					String s = evaluateExpressions(inst.expression(1), method);
 					String m = method.getBlock().findVar(inst.Identifier().getText()).getType().getText();
 					if (!evaluateExpressions(inst.expression(0), method).equals("int")) {
-						String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int.";
+						String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int at line number " + inst.start.getLine();
 						System.out.println(output + "\u001B[0m");
 						System.exit(0);
-					} else if (!s.equals(m)) {
-						String output = "\u001B[31m" + inst.expression(0).getText() + " is not of the same type.";
-						System.out.println(output + "\u001B[0m");
-						System.exit(0);
+					} else if (!s.equals(m.substring(0,m.indexOf("["))) ) {
+						String b = m.substring(0,m.indexOf("["));
+						if(!s.equals("int") && !b.equals("double")){
+							String output = "\u001B[31m" + inst.expression(1).getText() + " is not of the same type at line number " + inst.start.getLine();
+							System.out.println(output + "\u001B[0m");
+							System.exit(0);
+						}
 					}
 				} else if(inst.expression().size() == 1){
 					String s = evaluateExpressions(inst.expression(0), method);
 					String m = method.getBlock().findVar(inst.Identifier().getText()).getType().getText();
 					if (!s.equals(m)) {
-						String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int.";
+						String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int at line number " + inst.start.getLine();
 						System.out.println(output + "\u001B[0m");
 						System.exit(0);
-					}
-				}
-			}else if(inst.expression().size() == 1 && inst.statement().size() == 0){
-				System.out.println(inst.getText());
-				Variable v = method.getBlock().findVar(inst.Identifier().getText());
-				if(v == null){
-					String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int.";
-					System.out.println(output + "\u001B[0m");
-					System.exit(0);
-				}
-				else if (!evaluateExpressions(inst.expression(0), method).equals(v.getType().getText())){
-					String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int.";
-					System.out.println(output + "\u001B[0m");
-					System.exit(0);
-				}
-			}
-			else if(inst.getText().contains("while")){
-				if(evaluateExpressions(inst.expression(0),method).equals("boolean")){
-					return ifWhileHelper(inst.statement(0).statement(),method);
-				}
-			}
-			else if(inst.getText().contains("if")){
-				if(evaluateExpressions(inst.expression(0),method).equals("boolean")){
-					if(ifWhileHelper(inst.statement(0).statement(),method)){
-						return ifWhileHelper(inst.statement(1).statement(),method);
 					}
 				}
 			}
 			else if(inst.getText().contains("System")){
 				String s = evaluateExpressions(inst.expression(0),method);
-				return s.equals("int");
+				if(!s.equals("int")){
+					String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type at line number " + inst.start.getLine();
+					System.out.println(output + "\u001B[0m");
+					System.exit(0);
+				}
 			}
 		}
-	}
 		return true;
 	}
-
 	//Evaluates an expression to its given type
 	public String evaluateExpressions(MiniJavaGrammarParser.ExpressionContext expression, MethodDeclaration method){
 		if(expression.getText().equals("true") || expression.getText().equals("false")) return "boolean";
@@ -266,7 +287,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 		}
 		else if(expression.getText().contains("new") && expression.getText().contains("double") && expression.getText().contains("[")){
 			if(!evaluateExpressions(expression.expression(0),method).equals("int")){
-				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type int.";
+				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type int at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
@@ -274,7 +295,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 		}
 		else if(expression.getText().contains("new") && expression.getText().contains("int") && expression.getText().contains("[")){
 			if(!evaluateExpressions(expression.expression(0),method).equals("int")){
-				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type int.";
+				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type int at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
@@ -282,7 +303,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 		}
 		else if(expression.getText().contains("!") ){
 			if(!evaluateExpressions(expression.expression(0),method).equals("boolean")) {
-				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type boolean.";
+				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type boolean at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}else return "boolean";
@@ -292,20 +313,21 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 			if(result.equals("int") || result.equals("double")) {
 				return "int";
 			}else{
-				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type int or double.";
+				String output = "\u001B[31m" + expression.Identifier().getText() + " is not of type int or double at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
 		}
 		else if(expression.expression().size() == 2 && expression.getText().contains("[")){
 			String result = evaluateExpressions(expression.expression(0),method);
+			result = evaluateExpressions(expression.expression(0),method).substring(0,result.indexOf("["));
 			String resultRight = evaluateExpressions(expression.expression(1),method);
 			if((result.equals("int") || result.equals("double")) && resultRight.equals("int")) {
-				return result + "[]";
+				return result;
 			}else{
 				String output = "\u001B[31m";
-				output += resultRight.equals("int") ? expression.expression(0).getText() + " is not of type int or double."
-						: expression.expression(1).getText() + "is not of type int.";
+				output += resultRight.equals("int") ? expression.expression(0).getText() + " is not of type int or double at line number " + expression.start.getLine()
+						: expression.expression(1).getText() + "is not of type int at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
@@ -323,9 +345,9 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 							if(expression.expression().size()-1 == methodDeclaration.getParams().size()){
 								for(int i = 0; i < methodDeclaration.getParams().size(); i++){
 									if(correct)
-									if(!methodDeclaration.getParams().get(i).getType().getText().equals(evaluateExpressions(expression.expression(i),method)))
-										correct = true;
-									else correct = false;
+										if(!methodDeclaration.getParams().get(i).getType().getText().equals(evaluateExpressions(expression.expression(i),method)))
+											correct = true;
+										else correct = false;
 								}
 								if(correct) return methodDeclaration.getReturnType();
 							}
@@ -335,13 +357,13 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 						k = k.getInherited();
 						methods = k.getMethods();
 					}else{
-						String output = "\u001B[31m" + expression.Identifier().getText() + " is not a valid symbol.";
+						String output = "\u001B[31m" + expression.Identifier().getText() + " is not a valid symbol at line number " + expression.start.getLine();;
 						System.out.println(output + "\u001B[0m");
 						System.exit(0);
 					}
 				}
 			}else{
-				String output = "\u001B[31m" + expression.expression(0).getText() + " is not a valid symbol.";
+				String output = "\u001B[31m" + expression.expression(0).getText() + " is not a valid symbol at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
@@ -358,15 +380,15 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 		else if(expression.getText().contains("+") || expression.getText().contains("-") || expression.getText().contains("*")){
 			String left = evaluateExpressions(expression.expression(0),method);
 			String right = evaluateExpressions(expression.expression(1),method);
-					if(left.equals("int") && right.equals("int")) return "int";
-					else if (left.equals("int") && right.equals("double")) return "double";
-					else if (left.equals("double") && right.equals("int")) return "double";
-					else if (left.equals("double") && right.equals("double")) return "double";
-					else{
-						String output = "\u001B[31m" + expression.getText() + " is not of type int or double.";
-						System.out.println(output + "\u001B[0m");
-						System.exit(0);
-					}
+			if(left.equals("int") && right.equals("int")) return "int";
+			else if (left.equals("int") && right.equals("double")) return "double";
+			else if (left.equals("double") && right.equals("int")) return "double";
+			else if (left.equals("double") && right.equals("double")) return "double";
+			else{
+				String output = "\u001B[31m" + expression.getText() + " is not of type int or double at line number " + expression.start.getLine();
+				System.out.println(output + "\u001B[0m");
+				System.exit(0);
+			}
 		}
 		else if(expression.getText().contains("&&")){
 			String left = evaluateExpressions(expression.expression(0),method);
@@ -374,7 +396,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 			if(left.equals("boolean") && right.equals("boolean")){
 				return "boolean";
 			}else{
-				String output = "\u001B[31m" + expression.getText() + " is not of type boolean.";
+				String output = "\u001B[31m" + expression.getText() + " is not of type boolean at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
@@ -387,7 +409,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 			else if (left.equals("double") && right.equals("int")) return "boolean";
 			else if (left.equals("double") && right.equals("double")) return "boolean";
 			else{
-				String output = "\u001B[31m" + expression.getText() + " is not of type int or double.";
+				String output = "\u001B[31m" + expression.getText() + " is not of type int or double at line number " + expression.start.getLine();
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}

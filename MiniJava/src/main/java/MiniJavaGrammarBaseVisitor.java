@@ -147,7 +147,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 			if(method.getBlock().getInstructions().size() > 0) {
 				for (Object instruction : method.getBlock().getInstructions()) {
 					MiniJavaGrammarParser.StatementContext inst = (MiniJavaGrammarParser.StatementContext) instruction;
-					 if(inst.getText().contains("while")){
+					if(inst.getText().contains("while")){
 						String s = evaluateExpressions(inst.expression(0),method);
 						if(!s.equals("boolean")){
 							String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
@@ -158,15 +158,15 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 						}
 					}
 					else if(inst.getText().contains("if")){
-						 String s = evaluateExpressions(inst.expression(0),method);
-						 if(!s.equals("boolean")){
-							 String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
-							 System.out.println(output + "\u001B[0m");
-							 System.exit(0);
-						 }else {
-							 Boolean b = helper(method, inst.statement(0).statement());
-							 Boolean c = helper(method, inst.statement(1).statement());
-						 }
+						String s = evaluateExpressions(inst.expression(0),method);
+						if(!s.equals("boolean")){
+							String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type boolean at line number " + inst.start.getLine();
+							System.out.println(output + "\u001B[0m");
+							System.exit(0);
+						}else {
+							Boolean b = helper(method, inst.statement(0).statement());
+							Boolean c = helper(method, inst.statement(1).statement());
+						}
 					}
 					else if (inst.getText().contains("=") && inst.Identifier() != null) {
 						if (inst.expression().size() == 2) {
@@ -185,7 +185,10 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 								}
 							}
 						} else if(inst.expression().size() == 1){
-							String s = evaluateExpressions(inst.expression(0), method);
+							String s = "";
+							for(Variable v : method.getTotal())
+								if(v.getIdentifier().equals(inst.Identifier().getText()))
+									s = v.getType().getText();
 							String m = method.getBlock().findVar(inst.Identifier().getText()).getType().getText();
 							if (!s.equals(m)) {
 								String output = "\u001B[31m" + inst.expression(0).getText() + " is not of type int at line number " + inst.start.getLine();
@@ -377,7 +380,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 					return v.getType().getText();
 			}
 		}
-		else if(expression.getText().contains("+") || expression.getText().contains("-") || expression.getText().contains("*")){
+		else if(expression.binary_operator.equals("+") || expression.binary_operator.equals("-") || expression.binary_operator.equals("*")){
 			String left = evaluateExpressions(expression.expression(0),method);
 			String right = evaluateExpressions(expression.expression(1),method);
 			if(left.equals("int") && right.equals("int")) return "int";
@@ -390,7 +393,7 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 				System.exit(0);
 			}
 		}
-		else if(expression.getText().contains("&&")){
+		else if(expression.binary_operator.equals("&&")){
 			String left = evaluateExpressions(expression.expression(0),method);
 			String right = evaluateExpressions(expression.expression(1),method);
 			if(left.equals("boolean") && right.equals("boolean")){
@@ -401,9 +404,27 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 				System.exit(0);
 			}
 		}
-		else if(expression.getText().contains("<")){
-			String left = evaluateExpressions(expression.expression(0),method);
-			String right = evaluateExpressions(expression.expression(1),method);
+		else if(expression.binary_operator.getText().equals("<")){
+			String left = "";
+			String right = "";
+			if(expression.expression(1).Identifier() != null)
+				for(Variable v : method.getTotal())
+					if(v.getIdentifier().equals(expression.expression(0).Identifier().getText()))
+						left = v.getType().getText();
+			if(expression.expression(1).Identifier() != null)
+				for(Variable v : method.getTotal())
+					if(v.getIdentifier().equals(expression.expression(1).Identifier().getText()))
+						 right = v.getType().getText();
+			if(left.equals("")) {
+				if(expression.expression(0).getText().indexOf("(") == 0)
+					right = evaluateExpressions(expression.expression(0).expression(0),method);
+				else right = evaluateExpressions(expression.expression(0),method);
+			}
+			if(right.equals("")) {
+				if(expression.expression(1).getText().indexOf("(") == 0)
+					right = evaluateExpressions(expression.expression(1).expression(0),method);
+				else right = evaluateExpressions(expression.expression(1),method);
+			}
 			if(left.equals("int") && right.equals("int")) return "boolean";
 			else if (left.equals("int") && right.equals("double")) return "boolean";
 			else if (left.equals("double") && right.equals("int")) return "boolean";
@@ -413,6 +434,9 @@ public class MiniJavaGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> i
 				System.out.println(output + "\u001B[0m");
 				System.exit(0);
 			}
+		}
+		else if(expression.getText().indexOf("(") == 0){
+			return evaluateExpressions(expression.expression(0),method);
 		}
 		else if(expression.Identifier() != null && expression.getText().contains("new") && expression.expression().size() == 1){
 			return evaluateExpressions(expression.expression(0),method);

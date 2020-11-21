@@ -1,6 +1,6 @@
 public class Variable {
     private String identifier, value;
-    MiniJavaGrammarParser.TypeContext type;
+    private MiniJavaGrammarParser.TypeContext type;
     int arrayLength;
 
     public Variable(MiniJavaGrammarParser.TypeContext t, String i, String v){
@@ -28,7 +28,7 @@ public class Variable {
     }
 
     public String toString(){
-        return this.type.getText();
+        return "Identifier: " + identifier + " Type: " + this.type.getText();
     }
 
 }

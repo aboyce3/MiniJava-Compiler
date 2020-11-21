@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Klass {
     private ArrayList<MethodDeclaration> methodDeclarations;
@@ -23,6 +24,8 @@ public class Klass {
 
     public ArrayList<Variable> getGlobals(){ return globals; }
 
+    public void addList(ArrayList<MethodDeclaration> methods){methodDeclarations.addAll(methods);}
+
     public void setMainMethod(CodeBlock b){ mainMethod = b; }
 
     public CodeBlock getMainMethod(){ return mainMethod; }
@@ -41,6 +44,19 @@ public class Klass {
 
     public void addMethod(MethodDeclaration m){
         methodDeclarations.add(m);
+    }
+
+    public void addAllMethods(){
+        Klass k;
+        if(!hasInheritedClass()) return;
+        else{
+            k = inherited;
+            this.methodDeclarations.addAll(k.methodDeclarations);
+        }
+        while(k.hasInheritedClass()){
+            k = k.inherited;
+            this.methodDeclarations.addAll(k.methodDeclarations);
+        }
     }
 
     public void setInherited(Klass inherited) {

@@ -1,9 +1,9 @@
 grammar MiniJavaGrammar;
 
-goal: mainClass ( classDeclaration )* EOF;
+goal: mainClass ( classDeclaration )* end;
 
 mainClass: 'class' Identifier '{' 'public' 'static' 'void' 'main' '(' 'String' '[' ']' Identifier ')' '{' statement '}' '}';
-classDeclaration: 'class' Identifier ( 'extends' Identifier)? '{' (varDeclaration)* (methodDeclaration)* '}' EOF?;
+classDeclaration: 'class' Identifier ( 'extends' Identifier)? '{' (varDeclaration)* (methodDeclaration)* '}' end?;
 varDeclaration: type Identifier ';';
 methodDeclaration: 'public' type Identifier '(' (type Identifier (',' type Identifier)* )? ')' '{' (varDeclaration)* (statement)* 'return' expression ';' '}';
 
@@ -15,15 +15,17 @@ type: 'int' '[' ']'
 	| Identifier
     ;
 
-statement: '{' (statement)* '}'
-	| 	'if' '(' expression ')' statement 'else' statement
-	| 	'while' '(' expression ')' statement
-	| 	'System.out.println' '(' expression ')' ';'
-	| 	Identifier '=' expression ';'
-	| 	Identifier '[' expression ']' '=' expression ';'
+statement
+    :   '{' (statement)* '}' #StatementBlock
+	| 	'if' '(' expression ')' statement 'else' statement #IfStatement
+	| 	'while' '(' expression ')' statement #WhileStatement
+	| 	'System.out.println' '(' expression ')' ';' #PrintLine
+	| 	Identifier '=' expression ';' #Assignment
+	| 	Identifier '[' expression ']' '=' expression ';' #ArrayAssignment
     ;
 
-expression: expression ( '&&' | '<' | '+' | '-'| '*' ) expression
+expression
+    :   expression binary_operator=( '&&' | '<' | '+' | '-'| '*' ) expression
 	| 	expression '[' expression ']'
 	| 	expression '.' 'length'
 	| 	expression '.' Identifier '(' ( expression ( ',' expression )* )? ')'
@@ -36,10 +38,11 @@ expression: expression ( '&&' | '<' | '+' | '-'| '*' ) expression
 	| 	'new' 'int' '[' expression ']'
 	| 	'new' 'double' '[' expression ']'
 	| 	'new' Identifier '(' ')'
-	| 	'new' Identifier '(' ')' expression
 	| 	'!' expression
 	| 	'(' expression ')'
     ;
+
+end: EOF;
 
 Identifier: [a-zA-Z_]+[a-zA-Z_0-9]*;
 INTEGER_LITERAL: [0-9]+;

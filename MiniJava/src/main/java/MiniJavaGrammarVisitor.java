@@ -1,4 +1,4 @@
-// Generated from MiniJavaGrammar.g4 by ANTLR 4.8
+// Generated from MiniJavaGrammar.g4 by ANTLR 4.7.2
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -46,15 +46,57 @@ public interface MiniJavaGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType(MiniJavaGrammarParser.TypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MiniJavaGrammarParser#statement}.
+	 * Visit a parse tree produced by the {@code StatementBlock}
+	 * labeled alternative in {@link MiniJavaGrammarParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatement(MiniJavaGrammarParser.StatementContext ctx);
+	T visitStatementBlock(MiniJavaGrammarParser.StatementBlockContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IfStatement}
+	 * labeled alternative in {@link MiniJavaGrammarParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfStatement(MiniJavaGrammarParser.IfStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code WhileStatement}
+	 * labeled alternative in {@link MiniJavaGrammarParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileStatement(MiniJavaGrammarParser.WhileStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PrintLine}
+	 * labeled alternative in {@link MiniJavaGrammarParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrintLine(MiniJavaGrammarParser.PrintLineContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Assignment}
+	 * labeled alternative in {@link MiniJavaGrammarParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssignment(MiniJavaGrammarParser.AssignmentContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ArrayAssignment}
+	 * labeled alternative in {@link MiniJavaGrammarParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayAssignment(MiniJavaGrammarParser.ArrayAssignmentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MiniJavaGrammarParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExpression(MiniJavaGrammarParser.ExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MiniJavaGrammarParser#end}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEnd(MiniJavaGrammarParser.EndContext ctx);
 }

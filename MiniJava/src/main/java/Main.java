@@ -5,7 +5,8 @@ import java.io.File;
 public class Main extends BaseErrorListener{
 
     public static void main(String[] args) throws Exception {
-        File path = new File("/home/andrew/IdeaProjects/MiniJava/src/main/resources/");
+        String currentDirectory = System.getProperty("user.dir");
+        File path = new File(currentDirectory + "/src/main/resources/");
         File[] files = path.listFiles();
         for (int i = 0; i < files.length; i++) {
             System.out.println("File Name: " + files[i].getName());
@@ -23,7 +24,6 @@ public class Main extends BaseErrorListener{
             parser = new MiniJavaGrammarParser(tokenStream);
             SecondVisitor visitor = new SecondVisitor(classVisitor);
             traverseResult = (Class) visitor.visit(parser.goal());
-            //if(new TypeChecking(classVisitor.classes).symbolsAndTypes()){}
         }
     }
 }

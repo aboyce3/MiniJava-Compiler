@@ -7,6 +7,7 @@ public class Klass {
     private Klass inherited;
     private String inheritedClassName,className;
     private CodeBlock mainMethod;
+    private boolean isMainMethod = false;
 
     public Klass(String c, String k){
         methodDeclarations = new ArrayList<>();
@@ -18,6 +19,11 @@ public class Klass {
         methodDeclarations = new ArrayList<>();
         className = c;
         inheritedClassName = null;
+    }
+    public void setIsMainMethod(){ isMainMethod = true; }
+
+    public boolean isMainMethod(){
+        return isMainMethod;
     }
 
     public void addGlobal(Variable v){ globals.add(v); }

@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import Models.*;
+
 
 public class CodeBlock {
     private List instructions;
@@ -20,7 +22,6 @@ public class CodeBlock {
     public void setReturnStatement(MiniJavaGrammarParser.ExpressionContext s){ returnStatement = s; }
 
     public MiniJavaGrammarParser.ExpressionContext getReturnStatement() { return returnStatement; }
-
 
     public void add(MiniJavaGrammarParser.StatementContext e){
         instructions.add(e);

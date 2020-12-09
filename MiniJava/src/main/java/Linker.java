@@ -24,6 +24,7 @@ public class Linker<T> extends AbstractParseTreeVisitor<T> implements MiniJavaGr
 	@Override public T visitMainClass(MiniJavaGrammarParser.MainClassContext ctx) {
 		Klass klass = new Klass(ctx.Identifier(0).toString());
 		klass.setMainMethod(new CodeBlock(null, ctx.statement()));
+		currentClass.setIsMainMethod();
 		classes.put(klass.getClassName(),klass);
 		return visitChildren(ctx);
 	}

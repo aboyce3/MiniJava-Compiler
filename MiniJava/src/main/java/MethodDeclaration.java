@@ -5,6 +5,7 @@ public class MethodDeclaration {
     private ArrayList<Variable> params, total;
     private MiniJavaGrammarParser.ExpressionContext returnStatement;
     private CodeBlock block;
+    private Klass k;
 
     public MethodDeclaration(String r, String i, String c, MiniJavaGrammarParser.ExpressionContext expression){
         returnType = r;
@@ -15,11 +16,20 @@ public class MethodDeclaration {
         returnStatement = expression;
     }
 
+    public void setK(Klass k) { this.k = k; }
+
+    public Klass getK() {return this.k; }
+
     public void setBlock(CodeBlock b){ block = b; }
 
     public void addParam(Variable params) {
         this.total.add(params);
         this.params.add(params);
+    }
+
+    public void setParamsLocal(){
+            for(int i = k.getGlobals().size() + params.size(); i < total.size(); i++)
+                total.get(i).localLocation = params.size() + i;
     }
 
     public MiniJavaGrammarParser.ExpressionContext getReturnStatement(){

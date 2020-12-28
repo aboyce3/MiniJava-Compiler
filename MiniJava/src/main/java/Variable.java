@@ -2,12 +2,15 @@ public class Variable {
     private String identifier, value;
     private MiniJavaGrammarParser.TypeContext type;
     int arrayLength;
+    int localLocation;
 
     public Variable(MiniJavaGrammarParser.TypeContext t, String i, String v){
         type = t;
         identifier = i;
         value = v;
     }
+
+    public void setLocalLocation(int i) { localLocation = i; }
 
     public String getIdentifier() {
         return identifier;

@@ -25,7 +25,7 @@ statement
     ;
 
 expression
-    :   expression binary_operator=( '&&' | '<' | '+' | '-'| '*' ) expression
+    :   expression binary_operator=( '&&' | '<' | '+' | '-' | '*' ) expression
 	| 	expression '[' expression ']'
 	| 	expression '.' 'length'
 	| 	expression '.' Identifier '(' ( expression ( ',' expression )* )? ')'

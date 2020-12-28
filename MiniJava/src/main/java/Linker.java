@@ -24,7 +24,6 @@ public class Linker<T> extends AbstractParseTreeVisitor<T> implements MiniJavaGr
 	@Override public T visitMainClass(MiniJavaGrammarParser.MainClassContext ctx) {
 		Klass klass = new Klass(ctx.Identifier(0).toString());
 		klass.setMainMethod(new CodeBlock(null, ctx.statement()));
-		currentClass.setIsMainMethod();
 		classes.put(klass.getClassName(),klass);
 		return visitChildren(ctx);
 	}
@@ -85,9 +84,8 @@ public class Linker<T> extends AbstractParseTreeVisitor<T> implements MiniJavaGr
 						if (k == temp && !stop) {
 							System.out.println("\u001B[31m" + "Cyclic inheritance involving " + seen.toString() + "\u001B[0m");
 							stop = true;
-							errorNotFound = false;
 						}
-						if (stop) break;
+					if (stop) break;
 
 					seen.add(temp);
 				}
@@ -113,18 +111,13 @@ public class Linker<T> extends AbstractParseTreeVisitor<T> implements MiniJavaGr
 								String t2 = declarations.get(j).getParams().get(k).getType().getText();
 								if (t.equals(t2)) {
 									System.out.println("\u001B[31m" + "Overload/Override Error involving methods entitled " + declarations.get(i).getIdentifier() + "\u001B[0m");
-									errorNotFound = false;
 								}
 							}
 						}
-						}
 					}
 				}
+		}
 		declarationCheck();
-	}
-
-	public boolean isErrorNotFound() {
-		return errorNotFound;
 	}
 
 	//Check for duplicate declarations.
@@ -137,7 +130,6 @@ public class Linker<T> extends AbstractParseTreeVisitor<T> implements MiniJavaGr
 					if (s.equals(t)) {
 						String output = "\u001B[31m" + "Identical declarations for the variable name " + m.getTotal().get(j).getIdentifier();
 						System.out.println(output + "\u001B[0m");
-						errorNotFound = false;
 					}
 				}
 			}
